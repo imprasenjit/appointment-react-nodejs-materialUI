@@ -1,0 +1,10 @@
+web: node app.js
+
+# Downloaded Application Settings from "socialApp94353"
+MONGO_URL="mongodb://socialapp94353:HxatKz6jbxBdrwSKei12FnFdqgDWa6SAXXFW7O2qpfGQpR8tK2pIbqiakraqblxbg3KPe7pFwpCovEJdWKD5Pg%3D%3D@socialapp94353.mongo.cosmos.azure.com:10255/socialApp?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@socialapp94353@"
+PORT="3001"
+SERVER_URL="http://localhost:3001"
+JWT_SECRET="eyJhbGciOiJIUzI1NiJ9"
+CLIENT_URL="http://localhost:3000"
+DATABASE="reactnativesocialapp"
+WEBSITE_HTTPLOGGING_RETENTION_DAYS="7"

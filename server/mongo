@@ -1,0 +1,3 @@
+cd C:\Program Files\MongoDB\Server\4.2\bin
+mongodump -d reactnativesocialapp -o C:\xampp\htdocs\React\NodeJSApp\mongodump\
+mongorestore -d appeal C:\xampp\htdocs\rtps\mongodump\latest\appeal
