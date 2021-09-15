@@ -52,7 +52,6 @@ exports.createDoctor = async (req, res) => {
     });
     let doctor = await new Doctor(req.body);
     console.log(req.body);
-    console.log(doctor);
     await doctor.save((err, result) => {
         if (err) {
             return res.status(400).json({

@@ -1,23 +1,26 @@
-const Model = require('../models/slot');
-const { Appointment, Slot } = Model;
+const Slot = require('../models/slot');
+const mongoose = require('mongoose');
+
+const Schema = mongoose.Schema,
+  model = mongoose.model.bind(mongoose),
+  { ObjectId } = mongoose.Schema;
 
 const slotController = {
   all(req, res) {
-    // Returns all Slots
-    Slot.find({})
+    console.log(req.params.doctorID);
+    Slot.find({ doctor: { $eq: req.params.doctorID } })
       .exec((err, slots) => res.json(slots))
   },
   create(req, res) {
     var requestBody = req.body;
-
-    var newslot = new Slot({
-      slot_time: requestBody.slot_time,
-      slot_date: requestBody.slot_date,
+    console.log(req.body);
+    var newSlot = new Slot({
+      start_time: requestBody.startTime,
+      end_time: requestBody.endTime,
+      doctor: requestBody.doctor,
       created_at: Date.now()
     });
     newSlot.save((err, saved) => {
-      //Returns the new slot
-      //after a successful save
       Slot
         .findOne({ _id: saved._id })
         .exec((err, slot) => res.json(slot));

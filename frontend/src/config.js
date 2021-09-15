@@ -1,1 +1,11 @@
-export const API = "http://localhost:3001"
+export const API = "http://localhost:3001";
+export const authAPI = 'http://localhost:7001/';
+export const searchPatientAPI = 'http://localhost:7002/';
+export const observationAPI = 'http://localhost:7003/';
+export const demographicAPI = 'http://localhost:7004/';
+export const appointmentAPI = 'http://localhost:7005/';
+export const allergiesAPI = 'http://localhost:7006/';
+export const medicationAPI = 'http://localhost:7007/';
+export const problemsAPI = 'http://localhost:7008/';
+export const proceduresAPI = 'http://localhost:7009/';
+export const immunizationsAPI = 'http://localhost:7010/';

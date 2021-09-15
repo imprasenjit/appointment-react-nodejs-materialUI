@@ -25,9 +25,9 @@ import Page from '../components/Page';
 import Label from '../components/Label';
 import Scrollbar from '../components/Scrollbar';
 import SearchNotFound from '../components/SearchNotFound';
-import { UserListHead, UserListToolbar, UserMoreMenu } from '../components/_dashboard/user';
+import { UserListHead, UserListToolbar, PatientMoreMenu } from '../components/_dashboard/patients';
 //
-import { httpCall } from '../middleware/axios-utils';
+import { httpCall, getClientCredientials } from '../middleware/axios-utils';
 
 import { API } from '../config';
 
@@ -37,8 +37,9 @@ const TABLE_HEAD = [
   { id: 'name', label: 'Name', alignRight: false },
   { id: 'mobile', label: 'Mobile', alignRight: false },
   { id: 'address', label: 'Address', alignRight: false },
+  { id: 'fhir_id', label: 'FHIR ID', alignRight: false },
   // { id: 'isVerified', label: 'Verified', alignRight: false },
-  { id: 'status', label: 'Status', alignRight: false },
+  // { id: 'status', label: 'Status', alignRight: false },
   { id: '' }
 ];
 
@@ -73,7 +74,7 @@ function applySortFilter(array, comparator, query) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-export default function User() {
+export default function Patients() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('asc');
   const [selected, setSelected] = useState([]);
@@ -104,6 +105,7 @@ export default function User() {
   }
   useEffect(() => {
     fetchPatients();
+    getClientCredientials();
   }, []);
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -184,7 +186,7 @@ export default function User() {
                   {filteredUsers
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row) => {
-                      const { id, name, role, status, company, avatarUrl, isVerified } = row;
+                      const { id, name, email, photo, mobile, address, fhir_id } = row;
                       const isItemSelected = selected.indexOf(name) !== -1;
 
                       return (
@@ -204,26 +206,19 @@ export default function User() {
                           </TableCell>
                           <TableCell component="th" scope="row" padding="none">
                             <Stack direction="row" alignItems="center" spacing={2}>
-                              <Avatar alt={name} src={avatarUrl} />
+                              <Avatar alt={name} src={photo ?? ""} />
                               <Typography variant="subtitle2" noWrap>
                                 {name}
                               </Typography>
                             </Stack>
                           </TableCell>
-                          <TableCell align="left">{company}</TableCell>
-                          <TableCell align="left">{role}</TableCell>
-                          {/* <TableCell align="left">{isVerified ? 'Yes' : 'No'}</TableCell> */}
-                          <TableCell align="left">
-                            <Label
-                              variant="ghost"
-                              color={(status === 'banned' && 'error') || 'success'}
-                            >
-                              {sentenceCase(status)}
-                            </Label>
-                          </TableCell>
+                          <TableCell align="left">{email ?? ""}</TableCell>
+                          <TableCell align="left">{address}</TableCell>
+                          <TableCell align="left">{fhir_id ? fhir_id : 'N/A'}</TableCell>
+
 
                           <TableCell align="right">
-                            <UserMoreMenu />
+                            <PatientMoreMenu patientID={fhir_id} />
                           </TableCell>
                         </TableRow>
                       );

@@ -6,13 +6,14 @@ require('dotenv').config();
 const expressJwt = require('express-jwt');
 
 const User = require('../models/user');
+const Doctor = require('../models/doctor');
 
 
-exports.signup = async (req,res) => {
+exports.signup = async (req, res) => {
 
     const userExists = await User.findOne({ email: req.body.email });
-    if(userExists) return res.status(403).json({ 
-        error: "Email already taken!" 
+    if (userExists) return res.status(403).json({
+        error: "Email already taken!"
     });
     let user = await new User(req.body);
     console.log(req.body);
@@ -22,46 +23,84 @@ exports.signup = async (req,res) => {
     res.status(200).json({ message: "Signup success! Please Login. " });
 };
 
-exports.signin = (req,res) => {
+exports.signin = (req, res) => {
     console.log(req.body);
     // find user by email
-    const {email,password,notificationToken} = req.body;
+    const { email, password, notificationToken } = req.body;
     console.log(req.body);
-    User.findOne({email}, (err, user) => {
+    User.findOne({ email }, (err, user) => {
         // if error or no user found
-        if(err || !user){
+        if (err || !user) {
             return res.status(401).json({
                 error: "User with that email does not exist. Please signup. "
             });
         }
         // if user is found => match the password by userschema methods authenticate
-        if(!user.authenticate(password)){
+        if (!user.authenticate(password)) {
             return res.status(401).json({
                 error: "Email and password do not match"
             });
         }
 
-        if(notificationToken && notificationToken !== null){
-            User.findOneAndUpdate({ email: user.email }, { $set: {"notificationToken": notificationToken} }, (err,result) => {
-                if(err){
+        if (notificationToken && notificationToken !== null) {
+            User.findOneAndUpdate({ email: user.email }, { $set: { "notificationToken": notificationToken } }, (err, result) => {
+                if (err) {
                     return res.status(401).json({
                         error: "Some error occurred! Please try again later."
                     })
                 }
             })
         }
-        
+
         //generate token with user id and secret 
-        const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET );
+        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
         //persist the token as 't' in cookie with expiry date
         res.cookie("t", token, { expire: new Date() + 9999 });
         //return response with user and token to frontend client
         const { _id, name, email } = user;
-        return res.json({ token, user: { _id, email, name }});
+        return res.json({ token, user: { _id, email, name } });
+    });
+}
+exports.doctorSignin = (req, res) => {
+    console.log(req.body);
+    // find user by email
+    const { email, password, notificationToken } = req.body;
+    console.log(req.body);
+    Doctor.findOne({ email }, (err, user) => {
+        // if error or no user found
+        if (err || !user) {
+            return res.status(401).json({
+                error: "User with that email does not exist. Please signup. "
+            });
+        }
+        // if user is found => match the password by userschema methods authenticate
+        if (!user.authenticate(password)) {
+            return res.status(401).json({
+                error: "Email and password do not match"
+            });
+        }
+
+        if (notificationToken && notificationToken !== null) {
+            User.findOneAndUpdate({ email: user.email }, { $set: { "notificationToken": notificationToken } }, (err, result) => {
+                if (err) {
+                    return res.status(401).json({
+                        error: "Some error occurred! Please try again later."
+                    })
+                }
+            })
+        }
+
+        //generate token with user id and secret 
+        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+        //persist the token as 't' in cookie with expiry date
+        res.cookie("t", token, { expire: new Date() + 9999 });
+        //return response with user and token to frontend client
+        const { _id, name, email } = user;
+        return res.json({ token, user: { _id, email, name } });
     });
 }
 
-exports.signout = (req,res) => {
+exports.signout = (req, res) => {
     res.clearCookie("t")
     return res.status(200).json({ message: "signout success! " })
 }
@@ -102,12 +141,10 @@ exports.forgotPassword = (req, res) => {
             from: "noreply@node-react.com",
             to: email,
             subject: "Password Reset Instructions",
-            text: `Please use the following link to reset your password: ${
-                process.env.CLIENT_URL
-            }/reset-password/${token}`,
-            html: `<p>Please use the following link to reset your password:</p> <p>${
-                process.env.CLIENT_URL
-            }/reset-password/${token}</p>`
+            text: `Please use the following link to reset your password: ${process.env.CLIENT_URL
+                }/reset-password/${token}`,
+            html: `<p>Please use the following link to reset your password:</p> <p>${process.env.CLIENT_URL
+                }/reset-password/${token}</p>`
         };
 
         return user.updateOne({ resetPasswordLink: token }, (err, success) => {

@@ -1,6 +1,6 @@
 
-const Model = require('../models/slot');
-const { Appointment, Slot } = Model;
+const Appointment = require('../models/appointment');
+
 // const Nexmo = require("nexmo");
 
 const appointmentController = {
@@ -28,37 +28,10 @@ const appointmentController = {
       slots: newslot._id
     });
 
-    // const nexmo = new Nexmo({
-    //   apiKey: "YOUR_API_KEY",
-    //   apiSecret: "YOUR_API_SECRET"
-    // });
-
-    // let msg =
-    //   requestBody.name +
-    //   " " +
-    //   "this message is to confirm your appointment at" +
-    //   " " +
-    //   requestBody.appointment;
-
-    // and saves the record to
-    // the data base
     newappointment.save((err, saved) => {
-      // Returns the saved appointment
-      // after a successful save
       Appointment.find({ _id: saved._id })
         .populate("slots")
         .exec((err, appointment) => res.json(appointment));
-
-      // const from = VIRTUAL_NUMBER;
-      // const to = RECIPIENT_NUMBER;
-
-      // nexmo.message.sendSms(from, to, msg, (err, responseData) => {
-      //   if (err) {
-      //     console.log(err);
-      //   } else {
-      //     console.dir(responseData);
-      //   }
-      // });
     });
   }
 };

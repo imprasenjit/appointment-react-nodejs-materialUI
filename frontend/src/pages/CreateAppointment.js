@@ -1,7 +1,6 @@
 import { Link as RouterLink } from 'react-router-dom';
 import React, { Component, useEffect, useState } from "react";
 import Button from '@material-ui/core/Button';
-import moment from "moment";
 import { styled } from '@material-ui/core/styles';
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from '@material-ui/core/DialogActions';
@@ -29,21 +28,15 @@ import TextField from '@material-ui/core/TextField';
 import AuthLayout from '../layouts/AuthLayout';
 import { Link, Container } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
-import { style } from '@material-ui/system';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+//import LocalizationProvider from '@mui/lab/LocalizationProvider';
+// import USERLIST from '../_mocks_/user';
+import moment from "moment";
+import DatePicker from '@mui/lab/DatePicker';
+import frLocale from "date-fns/locale/fr";
+
 const useStyles = makeStyles((theme) => ({
-    root: {
-        '&:hover': {
-            backgroundColor: 'transparent',
-        },
-        '& .MuiTextField-root': {
-            margin: theme.spacing(1),
-            width: 200,
-        },
-    },
-    formControl: {
-        margin: theme.spacing(1),
-        minWidth: 120,
-    },
     icon: {
         borderRadius: '50%',
         width: 16,
@@ -127,22 +120,18 @@ const CreateAppointment = () => {
     const [confirmationSnackbarMessage, setConfirmationSnackbarMessage] = useState();
     const [doctor, setDoctor] = useState('');
     const [doctors, setDoctors] = useState('');
+    const [value, setValue] = useState(null);
+
+    const [slots, setSlots] = useState();
     const handleDoctorChange = (event) => {
-        // console.log()
+        console.log(event.target.value)
         setDoctor(event.target.value);
+        axios.get(API + `/retrieveAvailableSlots/` + event.target.value).then((response) => {
+            // console.log("response via db: ", response.data);
+            handleDBReponse(response.data);
+        });
     };
-    // firstName: "",
-    // lastName: "",
-    // email: "",
-    // schedule: [],
-    // confirmationModalOpen: false,
-    // appointmentDateSelected: false,
-    // appointmentMeridiem: 0,
-    // validEmail: true,
-    // validPhone: true,
-    // finished: false,
-    // smallScreen: window.innerWidth < 768,
-    // stepIndex: 0,
+
     const fetchDoctors = () => {
         axios.get(API + `/doctors`).then((response) => {
             console.log("response via db: ", response.data);
@@ -151,12 +140,7 @@ const CreateAppointment = () => {
         });
     }
     useEffect(() => {
-        // console.log(API);
         fetchDoctors();
-        axios.get(API + `/retrieveSlots`).then((response) => {
-            // console.log("response via db: ", response.data);
-            handleDBReponse(response.data);
-        });
     }, []);
     const handleSetAppointmentDate = (date) => {
         setAppointmentDate(date);
@@ -336,20 +320,17 @@ const CreateAppointment = () => {
         }
     }
     const DatePickerExampleSimple = () => (
-        <div>
-            <TextField
-                id="date"
+        <LocalizationProvider dateAdapter={AdapterDateFns} locale={frLocale}>
+            <DatePicker
                 label="Select Date"
-                type="date"
-                onChange={(e) => handleSetAppointmentDate(e.target.value)}
-                // shouldDisableDate={(day) => checkDisableDate(day)}
-                // defaultValue="2017-05-24"
-                className={classes.textField}
-                InputLabelProps={{
-                    shrink: true,
+                mask="__/__/____"
+                value={value}
+                onChange={(newValue) => {
+                    setValue(newValue);
                 }}
+                renderInput={(params) => <TextField {...params} />}
             />
-        </div>
+        </LocalizationProvider>
     );
 
     const renderStepActions = (step) => {
@@ -408,7 +389,7 @@ const CreateAppointment = () => {
                                                 onChange={handleDoctorChange}
                                             >
                                                 {doctors && doctors.map((item) =>
-                                                    <MenuItem value="{item._id}">{item.name}</MenuItem>
+                                                    <MenuItem value={item._id}>{item.name}</MenuItem>
                                                 )
                                                 }
 

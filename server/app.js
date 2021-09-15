@@ -24,8 +24,10 @@ mongoose.connection.on("error", (err) => {
 const postRoutes = require("./routes/post");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
+const patientRoutes = require("./routes/patient");
 const chatRoutes = require("./routes/chat");
 const appointmentRoutes = require("./routes/appointment");
+const slotRoutes = require("./routes/slot");
 const doctorRoutes = require("./routes/doctor");
 const uploadRoutes = require("./routes/upload");
 
@@ -144,10 +146,12 @@ io.on("connection", async (socket) => {
 app.use("/", postRoutes);
 app.use("/", authRoutes);
 app.use("/", userRoutes);
+app.use("/", patientRoutes);
 app.use("/", chatRoutes);
 app.use("/", uploadRoutes);
 app.use("/", appointmentRoutes);
 app.use("/", doctorRoutes);
+app.use("/", slotRoutes);
 
 app.get("/test", function (req, res) {
   res.send("success");

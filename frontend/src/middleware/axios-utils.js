@@ -1,4 +1,5 @@
 import axios from "axios";
+import { authAPI } from "../config";
 
 export const httpCall = (requestConfig) => {
     const Auth = JSON.parse(localStorage.getItem("Auth"));
@@ -29,4 +30,17 @@ export const httpCall = (requestConfig) => {
     } else {
         return false;
     }
+};
+export const getClientCredientials = async (props) => {
+    await axios
+        .post(
+            authAPI,
+        )
+        .then((res) => {
+            console.log(res.data);
+            // localStorage.setItem("Auth", JSON.stringify(res.data));
+        })
+        .then(() => {
+            // props.setLoading(false);
+        });
 };

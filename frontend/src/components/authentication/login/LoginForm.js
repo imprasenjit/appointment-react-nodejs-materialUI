@@ -49,7 +49,7 @@ export default function LoginForm() {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       };
-      await axios.post(API + "/signin", data, requestHeaders)
+      await axios.post(API + "/signin/doctor", data, requestHeaders)
         .then((response) => {
           localStorage.setItem("Auth", JSON.stringify(response.data))
           navigate('/dashboard', { replace: true });

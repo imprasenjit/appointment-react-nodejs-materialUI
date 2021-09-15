@@ -6,26 +6,12 @@ const Schema = mongoose.Schema,
 
 
 const slotSchema = new Schema({
-  slot_time: String,
-  slot_date: String,
+  start_time: String,
+  end_time: String,
+  doctor: { type: ObjectId, ref: 'Doctor' },
   created_at: Date
 });
 
 const Slot = model('Slot', slotSchema);
 
-const appointmentSchema = new Schema({
-  id: ObjectId,
-  name: String,
-  email: String,
-  doctor: String,
-  status: String,
-  phone: Number,
-  slots: { type: ObjectId, ref: 'Slot' },
-  created_at: Date
-});
-
-const Appointment = model('Appointment', appointmentSchema);
-
-module.exports = {
-  Appointment, Slot
-};
+module.exports = Slot;

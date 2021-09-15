@@ -9,5 +9,5 @@ Logo.propTypes = {
 };
 
 export default function Logo({ sx }) {
-  return <Box component="img" src="/static/logo.webp" sx={{ width: 300, height: 40, ...sx }} />;
+  return <Box component="img" src="/static/logo.webp" sx={{ width: 240, height: 40, ...sx }} />;
 }

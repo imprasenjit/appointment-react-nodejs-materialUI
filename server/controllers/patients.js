@@ -2,21 +2,21 @@ const _ = require('lodash');
 const formidable = require('formidable');
 const fs = require('fs');
 
-const User = require('../models/user');
+const Patient = require('../models/patient');
 
-exports.userById = (req, res, next, id) => {
-    User.findById(id)
+exports.patientById = (req, res, next, id) => {
+    Patient.findById(id)
         .populate('following', '_id name')
         .populate('followers', '_id name')
         .select('name email photo created about following followers')
-        .exec((err, user) => {
-            if (err || !user) {
+        .exec((err, patient) => {
+            if (err || !patient) {
                 return res.status(400).json({
-                    error: "User not found"
+                    error: "Patient not found"
                 });
             }
-            // add profile object in request with user info
-            req.profile = user;
+            // add profile object in request with patient info
+            req.profile = patient;
             next();
         });
 };
@@ -25,50 +25,48 @@ exports.hasAuthorization = (req, res, next) => {
     const authorized = req.profile && req.auth && (req.profile._id === req.auth._id);
     if (!authorized) {
         return res.status(403).json({
-            error: "user is not authorized to perform this action"
+            error: "patient is not authorized to perform this action"
         });
     }
 };
 
-exports.allUsers = (req, res) => {
-    User.find((err, users) => {
+exports.allPatients = (req, res) => {
+    Patient.find((err, patients) => {
         if (err) {
             res.status(400).json({
                 error: err
             });
         }
-        return res.json(users);
+        return res.json(patients);
     })
-        .select("name email updated created about following followers notificationToken photo")
-        .populate('following', '_id name email')
-        .populate('followers', '_id name email');
+        .select("name email address mobile fhir_id updated created about notificationToken photo");
 };
 
-exports.getUser = (req, res) => {
-    // set hashed_password and salt undefined since we dont want it in response while viewing single user
+exports.getPatient = (req, res) => {
+    // set hashed_password and salt undefined since we dont want it in response while viewing single patient
     req.profile.hashed_password = undefined;
     req.profile.salt = undefined;
     return res.json(req.profile);
 };
 
-// exports.updateUser = (req, res, next) => {
-//     let user = req.profile;
+// exports.updatePatient = (req, res, next) => {
+//     let patient = req.profile;
 //     // extend method from lodash => mutates the source object
-//     user = _.extend(user, req.body);
-//     user.updated = Date.now();
-//     user.save((err) => {
+//     patient = _.extend(patient, req.body);
+//     patient.updated = Date.now();
+//     patient.save((err) => {
 //         if(err){
 //             return res.status(400).json({
 //                 error: "You are not authorized to perform this action !!"
 //             });
 //         }
-//         user.hashed_password = undefined;
-//         user.salt = undefined;
-//         res.json({user})
+//         patient.hashed_password = undefined;
+//         patient.salt = undefined;
+//         res.json({patient})
 //     });
 // };
 
-exports.updateUser = (req, res, next) => {
+exports.updatePatient = (req, res, next) => {
     let form = new formidable.IncomingForm();
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
@@ -77,77 +75,77 @@ exports.updateUser = (req, res, next) => {
                 error: "Photo could not be uploaded"
             })
         }
-        //save user
-        let user = req.profile;
-        user = _.extend(user, fields);
-        user.updated = Date.now();
+        //save patient
+        let patient = req.profile;
+        patient = _.extend(patient, fields);
+        patient.updated = Date.now();
 
         if (files.photo) {
-            user.photo.data = fs.readFileSync(files.photo.path);
-            user.photo.contentType = files.photo.type;
+            patient.photo.data = fs.readFileSync(files.photo.path);
+            patient.photo.contentType = files.photo.type;
         }
-        user.save((err, result) => {
+        patient.save((err, result) => {
             if (err) {
                 return res.status(400).json({
                     error: err
                 })
             }
-            user.hashed_password = undefined;
-            user.salt = undefined;
-            res.json(user);
+            patient.hashed_password = undefined;
+            patient.salt = undefined;
+            res.json(patient);
         });
     });
 };
 
 
-exports.updateUserRn = (req, res) => {
+exports.updatePatientRn = (req, res) => {
 
-    let user = req.profile;
+    let patient = req.profile;
     console.log(req.body);
-    user = _.extend(user, req.body);
+    patient = _.extend(patient, req.body);
 
-    user.updated = Date.now();
+    patient.updated = Date.now();
 
     // if(req.body.base64Data && req.body.imageType){
-    //     user.photo.data = Buffer.from(req.body.base64Data, 'base64');
-    //     user.photo.contentType = req.body.imageType;
+    //     patient.photo.data = Buffer.from(req.body.base64Data, 'base64');
+    //     patient.photo.contentType = req.body.imageType;
     // }
 
-    user.save((err, result) => {
+    patient.save((err, result) => {
         if (err) {
             return res.status(400).json({
                 error: err
             })
         }
-        user.hashed_password = undefined;
-        user.salt = undefined;
-        res.json(user);
+        patient.hashed_password = undefined;
+        patient.salt = undefined;
+        res.json(patient);
     });
 };
 
-exports.userPhoto = (req, res, next) => {
-    User.findById(req.params.userId, (err, user) => {
-        if (err || !user) {
+exports.patientPhoto = (req, res, next) => {
+    Patient.findById(req.params.patientId, (err, patient) => {
+        if (err || !patient) {
             res.status(400).json({
                 error: err
             })
         }
-        if (user.photo) {
-            return res.send(user.photo);
+        if (patient.photo) {
+            return res.send(patient.photo);
         }
         next();
     })
 };
 
-exports.deleteUser = (req, res, next) => {
-    let user = req.profile;
-    user.deleteOne((err, user) => {
+exports.deletePatient = (req, res, next) => {
+    let patient = req.profile;
+    patient.deleteOne((err, patient) => {
         if (err) {
             return res.status(400).json({
                 error: err
             });
         }
-        res.json({ message: "User deleted successfully" });
+        res.json({ message: "Patient deleted successfully" });
     });
 };
 

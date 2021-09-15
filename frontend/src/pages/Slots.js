@@ -14,6 +14,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 // material
 import {
     Card,
@@ -46,8 +48,9 @@ import TimePicker from '@mui/lab/TimePicker';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-    { id: 'name', label: '(#)', alignRight: false },
-    { id: 'time', label: 'Time', alignRight: false },
+    { id: 'sl_no', label: '(#)', alignRight: false },
+    { id: 'start_time', label: 'Start Time', alignRight: false },
+    { id: 'end_time', label: 'End Time', alignRight: false },
     { id: '' }
 ];
 
@@ -91,7 +94,10 @@ export default function Slots() {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [slotList, setSlotList] = useState([]);
     const [open, setOpen] = useState(false);
-    const [selectedTime, setSelectedTime] = useState(new Date(''));
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
+    const [doctor, setDoctor] = useState();
+    const [loading, setLoading] = useState(false);
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -105,9 +111,35 @@ export default function Slots() {
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
     };
-    const fetchSlots = async () => {
+    const createSlot = async () => {
+        setLoading(true);
         const reqConfig = {
             url: API + '/slots',
+            method: "post",
+            data: {
+                startTime: moment(startTime).format('LT'),
+                endTime: moment(endTime).format('LT'),
+                doctor: doctor
+            }
+        };
+        await httpCall(reqConfig)
+            .then((res) => {
+                console.log("resData", res.data);
+                setLoading(false);
+                setOpen(false);
+                fetchSlots();
+            })
+            .catch((error) => {
+                setLoading(false);
+                console.log(error);
+                // setLoader(false);
+            });
+    }
+    const fetchSlots = async (doctor) => {
+        const Auth = JSON.parse(localStorage.getItem("Auth"));
+        await setDoctor(Auth.user._id);
+        const reqConfig = {
+            url: API + '/retrieveSlots/' + Auth.user._id,
             method: "get",
         };
         await httpCall(reqConfig)
@@ -121,7 +153,7 @@ export default function Slots() {
                 // setLoader(false);
             });
     }
-    useEffect(() => {
+    useEffect(async () => {
         fetchSlots();
     }, []);
     const handleSelectAllClick = (event) => {
@@ -193,13 +225,22 @@ export default function Slots() {
                             <DialogContentText>
                                 Please Select the slot for appointment.
                             </DialogContentText>
-
+                            {loading && <CircularProgress />}
                             <LocalizationProvider dateAdapter={AdapterMoment}>
                                 <TimePicker
-                                    label="Time"
-                                    value={selectedTime}
+                                    label="Start Time"
+                                    value={startTime}
                                     onChange={(newValue) => {
-                                        setSelectedTime(newValue);
+                                        // console.log("starttime", moment(newValue).format('LT'));
+                                        setStartTime(newValue);
+                                    }}
+                                    renderInput={(params) => <TextField {...params} />}
+                                />
+                                <TimePicker
+                                    label="End Time"
+                                    value={endTime}
+                                    onChange={(newValue) => {
+                                        setEndTime(newValue);
                                     }}
                                     renderInput={(params) => <TextField {...params} />}
                                 />
@@ -210,7 +251,7 @@ export default function Slots() {
                         <Button onClick={handleClose} color="primary">
                             Cancel
                         </Button>
-                        <Button variant="contained" onClick={handleClose} color="primary">
+                        <Button variant="contained" onClick={createSlot} color="primary">
                             Create
                         </Button>
                     </DialogActions>
@@ -252,9 +293,9 @@ export default function Slots() {
                                 <TableBody>
                                     {filteredUsers
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                        .map((row) => {
-                                            const { _id, name, email, slots, status } = row;
-                                            const isItemSelected = selected.indexOf(name) !== -1;
+                                        .map((row, key) => {
+                                            const { _id, start_time, end_time } = row;
+                                            const isItemSelected = selected.indexOf(_id) !== -1;
 
                                             return (
                                                 <TableRow
@@ -268,30 +309,14 @@ export default function Slots() {
                                                     <TableCell padding="checkbox">
                                                         <Checkbox
                                                             checked={isItemSelected}
-                                                            onChange={(event) => handleClick(event, name)}
+                                                            onChange={(event) => handleClick(event, _id)}
                                                         />
                                                     </TableCell>
                                                     <TableCell component="th" scope="row" padding="none">
-                                                        <Stack direction="row" alignItems="center" spacing={2}>
-                                                            <Avatar alt={name} />
-                                                            <Typography variant="subtitle2" noWrap>
-                                                                {name}
-                                                            </Typography>
-                                                        </Stack>
+                                                        {key + 1}
                                                     </TableCell>
-                                                    <TableCell align="left">{email}</TableCell>
-                                                    <TableCell align="left">{slots.slot_date}</TableCell>
-                                                    <TableCell align="left">{getSlotTime(slots.slot_time)}</TableCell>
-                                                    {/* <TableCell align="left">{isVerified ? 'Yes' : 'No'}</TableCell> */}
-                                                    <TableCell align="left">
-                                                        <Label
-                                                            variant="ghost"
-                                                            color={(status === 'banned' && 'error') || 'success'}
-                                                        >
-                                                            {sentenceCase(status)}
-                                                        </Label>
-                                                    </TableCell>
-
+                                                    <TableCell align="left">{start_time}</TableCell>
+                                                    <TableCell align="left">{end_time}</TableCell>
                                                     <TableCell align="right">
                                                         <MoreMenu />
                                                     </TableCell>

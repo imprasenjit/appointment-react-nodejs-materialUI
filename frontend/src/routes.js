@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Appointments from './pages/Appointments';
 import Slots from './pages/Slots';
 import PatientAppointment from './pages/CreateAppointment';
+import ViewPatient from './pages/ViewPatient';
 // import Register from './pages/Register';
 // import DashboardApp from './pages/DashboardApp';
 // import Products from './pages/Products';
@@ -32,6 +33,7 @@ export default function Router() {
       children: [
         { path: 'appointments', element: <Appointments /> },
         { path: 'patients', element: <Patients /> },
+        { path: 'viewPatient/:patientID', element: <ViewPatient /> },
         { path: 'slots', element: <Slots /> },
       ]
     },
