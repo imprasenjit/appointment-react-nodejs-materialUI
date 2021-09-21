@@ -50,9 +50,9 @@ const useStyles = makeStyles((theme) =>
 );
 
 export default function BaseOptionChart() {
-  useStyles();
-  const theme = useTheme();
 
+  const theme = useTheme();
+  useStyles(theme);
   const LABEL_TOTAL = {
     show: true,
     label: 'Total',

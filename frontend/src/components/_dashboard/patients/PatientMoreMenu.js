@@ -13,6 +13,7 @@ export default function PatientMoreMenu(props) {
   const ref = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const patientUrl = `/dashboard/viewPatient/${props.patientID}`;
+  const patientDashboardUrl = `/dashboard/patientdashboard/${props.patientID}`;
   console.log(props.patientID);
   return (
     <>
@@ -36,19 +37,19 @@ export default function PatientMoreMenu(props) {
           </ListItemIcon>
           <ListItemText primary="View" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
-        <MenuItem sx={{ color: 'text.secondary' }}>
+        <MenuItem component={RouterLink} to={patientDashboardUrl} sx={{ color: 'text.secondary' }}>
           <ListItemIcon>
             <Icon icon={trash2Outline} width={24} height={24} />
           </ListItemIcon>
-          <ListItemText primary="Delete" primaryTypographyProps={{ variant: 'body2' }} />
+          <ListItemText primary="Analyctics" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
-
+        {/* 
         <MenuItem component={RouterLink} to="#" sx={{ color: 'text.secondary' }}>
           <ListItemIcon>
             <Icon icon={editFill} width={24} height={24} />
           </ListItemIcon>
           <ListItemText primary="Edit" primaryTypographyProps={{ variant: 'body2' }} />
-        </MenuItem>
+        </MenuItem> */}
       </Menu>
     </>
   );

@@ -26,6 +26,18 @@ const slotController = {
         .exec((err, slot) => res.json(slot));
     })
   },
+  delete(req, res) {
+    let slot = req.body.slot_id;
+    Slot.deleteOne({ _id: slot }, (err, user) => {
+      console.log(err);
+      if (err) {
+        return res.status(400).json({
+          error: err
+        });
+      }
+      res.json({ message: "Slot deleted successfully" });
+    });
+  },
   findByDate(req, res) {
     var slot_date = req.params.slot_date;
     console.log('slot date: ', slot_date);

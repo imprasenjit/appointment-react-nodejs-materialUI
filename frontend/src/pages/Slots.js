@@ -1,10 +1,8 @@
 import { filter } from 'lodash';
 import { Icon } from '@iconify/react';
-import { sentenceCase } from 'change-case';
 import { useState, useEffect } from 'react';
 import plusFill from '@iconify/icons-eva/plus-fill';
 import { Link as RouterLink } from 'react-router-dom';
-import axios from 'axios';
 import { API } from '../config';
 import { httpCall } from '../middleware/axios-utils';
 import Dialog from '@material-ui/core/Dialog';
@@ -13,7 +11,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 // material
@@ -37,7 +34,7 @@ import Page from '../components/Page';
 import Label from '../components/Label';
 import Scrollbar from '../components/Scrollbar';
 import SearchNotFound from '../components/SearchNotFound';
-import { ListHead, ListToolbar, MoreMenu } from '../components/_dashboard/slots';
+import { ListHead, ListToolbar, SlotsMoreMenu } from '../components/_dashboard/slots';
 import AdapterMoment from '@mui/lab/AdapterMoment';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 //import LocalizationProvider from '@mui/lab/LocalizationProvider';
@@ -318,7 +315,7 @@ export default function Slots() {
                                                     <TableCell align="left">{start_time}</TableCell>
                                                     <TableCell align="left">{end_time}</TableCell>
                                                     <TableCell align="right">
-                                                        <MoreMenu />
+                                                        <SlotsMoreMenu fetchSlots={fetchSlots} slot_id={_id} />
                                                     </TableCell>
                                                 </TableRow>
                                             );

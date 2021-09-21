@@ -8,6 +8,7 @@ import Appointments from './pages/Appointments';
 import Slots from './pages/Slots';
 import PatientAppointment from './pages/CreateAppointment';
 import ViewPatient from './pages/ViewPatient';
+import PatientDashboard from './pages/PatientDashboard';
 // import Register from './pages/Register';
 // import DashboardApp from './pages/DashboardApp';
 // import Products from './pages/Products';
@@ -34,6 +35,7 @@ export default function Router() {
         { path: 'appointments', element: <Appointments /> },
         { path: 'patients', element: <Patients /> },
         { path: 'viewPatient/:patientID', element: <ViewPatient /> },
+        { path: 'patientdashboard/:patientID', element: <PatientDashboard /> },
         { path: 'slots', element: <Slots /> },
       ]
     },

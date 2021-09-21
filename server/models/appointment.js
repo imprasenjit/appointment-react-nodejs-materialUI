@@ -8,10 +8,12 @@ const appointmentSchema = new Schema({
     id: ObjectId,
     name: String,
     email: String,
-    doctor: String,
+    doctor: { type: ObjectId, ref: "doctor" },
     status: String,
     phone: Number,
-    slots: { type: ObjectId, ref: 'Slot' },
+    slot_time: String,
+    // slot_end_time: String,
+    appointment_date: Date,
     created_at: Date
 });
 

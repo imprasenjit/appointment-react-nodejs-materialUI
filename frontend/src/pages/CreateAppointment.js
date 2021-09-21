@@ -110,7 +110,7 @@ const CreateAppointment = () => {
     const [validPhone, setValidPhone] = useState(true);
     const [finished, setFinished] = useState(false);
     const [stepIndex, setStepIndex] = useState(0);
-    const [appointmentDate, setAppointmentDate] = useState(0);
+    const [appointmentDate, setAppointmentDate] = useState(null);
     const [showSlots, setShowSlots] = useState(false);
     const [appointmentSlot, setAppointmentSlot] = useState(0);
     const [contactFormFilled, setContactFormFilled] = useState(true);
@@ -124,12 +124,7 @@ const CreateAppointment = () => {
 
     const [slots, setSlots] = useState();
     const handleDoctorChange = (event) => {
-        console.log(event.target.value)
         setDoctor(event.target.value);
-        axios.get(API + `/retrieveAvailableSlots/` + event.target.value).then((response) => {
-            // console.log("response via db: ", response.data);
-            handleDBReponse(response.data);
-        });
     };
 
     const fetchDoctors = () => {
@@ -142,10 +137,19 @@ const CreateAppointment = () => {
     useEffect(() => {
         fetchDoctors();
     }, []);
-    const handleSetAppointmentDate = (date) => {
+    const handleDateChange = (date) => {
         setAppointmentDate(date);
-        setConfirmationTextVisible(true);
-        setShowSlots(true);
+        setValue(date);
+        const data = {
+            appointmentDate: date,
+            doctor: doctor
+        };
+        axios.post(API + `/getAvailableSlots`, data).then((response) => {
+            console.log("response via db: ", response.data);
+            setSlots(response.data);
+            setShowSlots(true);
+            // handleDoctorsReponse(response.data);
+        });
     }
     const handleSetAppointmentSlot = (event) => {
         // console.log(event.target.value);
@@ -162,7 +166,7 @@ const CreateAppointment = () => {
             phone: phone,
             doctor: doctor,
             // status: 'active',
-            slot_date: moment(appointmentDate).format("YYYY-DD-MM"),
+            slot_date: moment(appointmentDate).format("YYYY-MM-DD"),
             slot_time: appointmentSlot,
         };
         axios
@@ -221,33 +225,7 @@ const CreateAppointment = () => {
             moment(day).startOf("day").diff(moment().startOf("day")) < 0
         );
     }
-    const handleDBReponse = (response) => {
-        const appointments = response;
-        const today = moment().startOf("day"); //start of today 12 am
-        // const initialSchedule = {};
-        // initialSchedule[today.format("YYYY-DD-MM")] = true;
-        // const schedule = !appointments.length ? initialSchedule : appointments.reduce((currentSchedule, appointment) => {
-        const schedule = appointments.reduce((currentSchedule, appointment) => {
-            const { slot_date, slot_time } = appointment;
-            const dateString = moment(slot_date, "YYYY-DD-MM").format("YYYY-DD-MM");
-            if (!currentSchedule[dateString]) {
-                currentSchedule[dateString] = Array(8).fill(false);
-            }
-            if (Array.isArray(currentSchedule[dateString])) {
-                currentSchedule[dateString][slot_time] = true;
-            }
-            return currentSchedule;
-        }, {});
-        for (let day in schedule) {
-            let slots = schedule[day];
-            if (slots.length > 0) {
-                if (slots.every((slot) => slot === true)) {
-                    (schedule[day] = true)
-                }
-            }
-        }
-        setSchedule(schedule)
-    }
+
     const renderAppointmentConfirmation = () => {
         const spanStyle = { color: "#00C853" };
         return (
@@ -273,45 +251,24 @@ const CreateAppointment = () => {
                     </span>{" "}
                     at{" "}
                     <span style={spanStyle}>
-                        {moment()
-                            .hour(9)
-                            .minute(0)
-                            .add(appointmentSlot, "hours")
-                            .format("h:mm a")}
+                        {appointmentSlot}
                     </span>
                 </p>
             </section>
         );
     }
     const renderAppointmentTimes = () => {
+        console.log("Slots", slots);
         if (!isLoading) {
-            const slots = [...Array(8).keys()];
-            // console.log(schedule);
             return slots.map((slot) => {
-                const appointmentDateString = moment(appointmentDate).format(
-                    "YYYY-DD-MM"
-                );
-                const time1 = moment().hour(9).minute(0).add(slot, "hours");
-                const time2 = moment()
-                    .hour(9)
-                    .minute(0)
-                    .add(slot + 1, "hours");
-                const scheduleDisabled = schedule[appointmentDateString]
-                    ? schedule[
-                    moment(appointmentDate).format("YYYY-DD-MM")
-                    ][slot]
-                    : false;
-                // const meridiemDisabled = appointmentMeridiem
-                //     ? time1.format("a") === "am"
-                //     : time1.format("a") === "pm";
                 return (
                     // <FormControlLabel value={slot.toString()} control={<Radio />} label={time1.format("h:mm a") + " - " + time2.format("h:mm a")} />
                     <FormControlLabel
-                        key={slot}
-                        value={slot.toString()}
-                        disabled={scheduleDisabled}
+                        key={slot._id}
+                        value={`${slot.start_time}-${slot.end_time}`}
+                        disabled={slot.status === 'available' ? false : true}
                         control={<Radio />}
-                        label={time1.format("h:mm a") + " - " + time2.format("h:mm a")}
+                        label={slot.start_time + " - " + slot.end_time}
                     />
                 );
             });
@@ -324,9 +281,9 @@ const CreateAppointment = () => {
             <DatePicker
                 label="Select Date"
                 mask="__/__/____"
-                value={value}
+                value={appointmentDate}
                 onChange={(newValue) => {
-                    setValue(newValue);
+                    handleDateChange(newValue);
                 }}
                 renderInput={(params) => <TextField {...params} />}
             />
@@ -401,15 +358,6 @@ const CreateAppointment = () => {
                                         </StepLabel>
                                         <StepContent>
                                             {DatePickerExampleSimple()}
-                                            {/* <Select
-                                                value={appointmentMeridiem}
-                                                onChange={(evt, key, payload) =>
-                                                    handleSetAppointmentMeridiem(payload)
-                                                }
-                                                selectionRenderer={(value) => (value ? "PM" : "AM")}>
-                                                <MenuItem value={0}>AM</MenuItem>
-                                                <MenuItem value={1}>PM</MenuItem>
-                                            </Select> */}
                                             {
                                                 showSlots &&
                                                 <RadioGroup

@@ -200,7 +200,7 @@ export default function Appointments() {
                                     {filteredUsers
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row) => {
-                                            const { _id, name, email, slots, status } = row;
+                                            const { _id, name, email, appointment_date, slot_time, status } = row;
                                             const isItemSelected = selected.indexOf(name) !== -1;
 
                                             return (
@@ -227,8 +227,8 @@ export default function Appointments() {
                                                         </Stack>
                                                     </TableCell>
                                                     <TableCell align="left">{email}</TableCell>
-                                                    <TableCell align="left">{slots.slot_date}</TableCell>
-                                                    <TableCell align="left">{getSlotTime(slots.slot_time)}</TableCell>
+                                                    <TableCell align="left">{moment(appointment_date).format("LL")}</TableCell>
+                                                    <TableCell align="left">{slot_time}</TableCell>
                                                     {/* <TableCell align="left">{isVerified ? 'Yes' : 'No'}</TableCell> */}
                                                     <TableCell align="left">
                                                         <Label
@@ -240,7 +240,7 @@ export default function Appointments() {
                                                     </TableCell>
 
                                                     <TableCell align="right">
-                                                        <MoreMenu />
+                                                        <MoreMenu fetchAppointments={fetchAppointments} appointmentID={_id} />
                                                     </TableCell>
                                                 </TableRow>
                                             );

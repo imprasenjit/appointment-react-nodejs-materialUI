@@ -11,7 +11,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-// ----------------------------------------------------------------------
 import { makeStyles } from '@material-ui/styles';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -45,9 +44,8 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: -12,
   },
 }));
-export default function MoreMenu(props) {
+export default function SlotsMoreMenu(props) {
   const classes = useStyles();
-
   const ref = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
@@ -55,10 +53,10 @@ export default function MoreMenu(props) {
   const handleSubmit = async () => {
     setLoading(true);
     const reqConfig = {
-      url: API + '/appointment/cancel',
+      url: API + '/slot/delete',
       method: "post",
       data: {
-        appointment_id: props.appointmentID
+        slot_id: props.slot_id
       }
     };
     await httpCall(reqConfig)
@@ -66,7 +64,7 @@ export default function MoreMenu(props) {
         console.log("resData", res.data);
         setLoading(false);
         setConfirmationModalOpen(false);
-        props.fetchAppointments();
+        props.fetchSlots();
       })
       .catch((error) => {
         setLoading(false);
@@ -85,7 +83,7 @@ export default function MoreMenu(props) {
         <DialogTitle id="alert-dialog-title">Alert</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Do you want to cancel the appointment?
+            Do you want to delete the slot?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -116,7 +114,7 @@ export default function MoreMenu(props) {
           <ListItemIcon>
             <Icon icon={trash2Outline} width={24} height={24} />
           </ListItemIcon>
-          <ListItemText primary="Cancel" primaryTypographyProps={{ variant: 'body2' }} />
+          <ListItemText primary="Delete" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
       </Menu>
     </>
