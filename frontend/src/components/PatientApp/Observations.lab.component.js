@@ -24,7 +24,7 @@ const useStyles = makeStyles({
 const Lab = ({ patientId }) => {
   const classes = useStyles();
   const [observations, setObservations] = useState([])
-  const [loader, setLoader] = useState()
+  const [loader, setLoader] = useState();
   const searchObservations = async () => {
     setLoader(true);
     // const url = `${cernerAPI}/Observation?category=laboratory&patient=${patientId}`;
@@ -42,7 +42,7 @@ const Lab = ({ patientId }) => {
         setLoader(false);
       })
       .catch((error) => {
-        if (error.response.status === 401) {
+        if (error.response?.status === 401) {
           getClientCredientials();
           searchObservations();
         } else {

@@ -8,18 +8,11 @@ import { Box, Grid, Container, Typography } from '@material-ui/core';
 // components
 import Page from '../components/Page';
 import {
-    AppTasks,
     AppNewUsers,
     AppBugReports,
     AppItemOrders,
-    AppNewsUpdate,
     AppWeeklySales,
-    AppOrderTimeline,
-    AppCurrentVisits,
-    AppWebsiteVisits,
-    AppTrafficBySite,
-    AppCurrentSubject,
-    AppConversionRates
+    ObservationChart, SocialHistory
 } from '../components/_dashboard/app';
 import { httpCall, getClientCredientials } from '../middleware/axios-utils';
 import Home from '../components/PatientApp/Home';
@@ -52,7 +45,10 @@ export default function PatientDashboard() {
             });
         // console.log(queryParams);
     };
-
+    useEffect(() => {
+        // fetchPatients();
+        getClientCredientials();
+    }, []);
     useEffect(() => {
         getPatientInfo();
     }, []);
@@ -61,23 +57,14 @@ export default function PatientDashboard() {
         <Page title="Patient Dashboard">
             <Container maxWidth="xl">
                 <Box sx={{ pb: 5 }}>
-                    <Typography variant="h4">Hi, Welcome back</Typography>
+                    <Typography variant="h4">{get(patientInfo, "name[0].text")}</Typography>
                 </Box>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <AppWeeklySales />
+                    <Grid item xs={12} md={6} lg={6}>
+                        <ObservationChart patientId={patientID} />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <AppNewUsers />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <AppItemOrders />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <AppBugReports />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={8}>
-                        <AppWebsiteVisits />
+                    <Grid item xs={12} md={6} lg={6}>
+                        <SocialHistory patientId={patientID} />
                     </Grid>
                 </Grid>
 

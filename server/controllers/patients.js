@@ -6,9 +6,7 @@ const Patient = require('../models/patient');
 
 exports.patientById = (req, res, next, id) => {
     Patient.findById(id)
-        .populate('following', '_id name')
-        .populate('followers', '_id name')
-        .select('name email photo created about following followers')
+        .select('name email ')
         .exec((err, patient) => {
             if (err || !patient) {
                 return res.status(400).json({
@@ -49,22 +47,6 @@ exports.getPatient = (req, res) => {
     return res.json(req.profile);
 };
 
-// exports.updatePatient = (req, res, next) => {
-//     let patient = req.profile;
-//     // extend method from lodash => mutates the source object
-//     patient = _.extend(patient, req.body);
-//     patient.updated = Date.now();
-//     patient.save((err) => {
-//         if(err){
-//             return res.status(400).json({
-//                 error: "You are not authorized to perform this action !!"
-//             });
-//         }
-//         patient.hashed_password = undefined;
-//         patient.salt = undefined;
-//         res.json({patient})
-//     });
-// };
 
 exports.updatePatient = (req, res, next) => {
     let form = new formidable.IncomingForm();
@@ -105,11 +87,6 @@ exports.updatePatientRn = (req, res) => {
     patient = _.extend(patient, req.body);
 
     patient.updated = Date.now();
-
-    // if(req.body.base64Data && req.body.imageType){
-    //     patient.photo.data = Buffer.from(req.body.base64Data, 'base64');
-    //     patient.photo.contentType = req.body.imageType;
-    // }
 
     patient.save((err, result) => {
         if (err) {
