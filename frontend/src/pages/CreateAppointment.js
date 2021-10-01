@@ -35,6 +35,7 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import moment from "moment";
 import DatePicker from '@mui/lab/DatePicker';
 import frLocale from "date-fns/locale/fr";
+import Alert from '@mui/material/Alert';
 
 const useStyles = makeStyles((theme) => ({
     icon: {
@@ -113,7 +114,7 @@ const CreateAppointment = () => {
     const [appointmentDate, setAppointmentDate] = useState(null);
     const [showSlots, setShowSlots] = useState(false);
     const [appointmentSlot, setAppointmentSlot] = useState(0);
-    const [contactFormFilled, setContactFormFilled] = useState(true);
+    const [contactFormFilled, setContactFormFilled] = useState(false);
     const [processed, setProcessed] = useState();
     const [isLoading, setIsLoading] = useState();
     const [confirmationTextVisible, setConfirmationTextVisible] = useState(false);
@@ -227,35 +228,42 @@ const CreateAppointment = () => {
     }
 
     const renderAppointmentConfirmation = () => {
-        const spanStyle = { color: "#00C853" };
-        return (
-            <section>
-                <p>
-                    Name:{" "}
-                    <span style={spanStyle}>
-                        {firstName} {lastName}
-                    </span>
-                </p>
-                <p>
-                    Number: <span style={spanStyle}>{phone}</span>
-                </p>
-                <p>
-                    Email: <span style={spanStyle}>{email}</span>
-                </p>
-                <p>
-                    Appointment:{" "}
-                    <span style={spanStyle}>
-                        {moment(appointmentDate).format(
-                            "dddd[,] MMMM Do[,] YYYY"
-                        )}
-                    </span>{" "}
-                    at{" "}
-                    <span style={spanStyle}>
-                        {appointmentSlot}
-                    </span>
-                </p>
-            </section>
-        );
+        if (firstName !== "" && lastName != "" && validPhone && validEmail) {
+            const spanStyle = { color: "#2d9df0" };
+            return (
+                <section>
+                    <p>
+                        Name:{" "}
+                        <span style={spanStyle}>
+                            {firstName} {lastName}
+                        </span>
+                    </p>
+                    <p>
+                        Number: <span style={spanStyle}>{phone}</span>
+                    </p>
+                    <p>
+                        Email: <span style={spanStyle}>{email}</span>
+                    </p>
+                    <p>
+                        Appointment:{" "}
+                        <span style={spanStyle}>
+                            {moment(appointmentDate).format(
+                                "dddd[,] MMMM Do[,] YYYY"
+                            )}
+                        </span>{" "}
+                        at{" "}
+                        <span style={spanStyle}>
+                            {appointmentSlot}
+                        </span>
+                    </p>
+                </section>
+            );
+        } else {
+            return (
+                <Alert severity="error">Please fill all the required informations.</Alert>
+            )
+        }
+
     }
     const renderAppointmentTimes = () => {
         console.log("Slots", slots);
@@ -268,7 +276,7 @@ const CreateAppointment = () => {
                         value={`${slot.start_time}-${slot.end_time}`}
                         disabled={slot.status === 'available' ? false : true}
                         control={<Radio />}
-                        label={slot.start_time + " - " + slot.end_time}
+                        label={moment(slot.start_time, "hh").format("LT") + " - " + moment(slot.end_time, "hh").format("LT")}
                     />
                 );
             });
@@ -293,11 +301,16 @@ const CreateAppointment = () => {
     const renderStepActions = (step) => {
         return (
             <div style={{ margin: "12px 0" }}>
-                <Button
+                {stepIndex !== 2 && <Button
                     variant="contained" color="primary"
                     onClick={handleNext}
-                    style={{ marginRight: 12, backgroundColor: "#00C853" }}
-                >{stepIndex === 2 ? "Finish" : "Next"}</Button>
+                    style={{ marginRight: 12, backgroundColor: "#2d9df0" }}
+                >Next</Button>}
+                {stepIndex === 2 && <Button
+                    variant="contained" color="primary"
+                    onClick={() => setConfirmationModalOpen(!confirmationModalOpen)}
+                    style={{ marginRight: 12, backgroundColor: "#2d9df0" }}
+                >Schedule Appointment</Button>}
                 {step > 0 && (
                     <Button
                         disabled={stepIndex === 0}
@@ -308,7 +321,10 @@ const CreateAppointment = () => {
             </div>
         );
     }
+    const vertical = 'top';
+    const horizontal = 'center';
     return (
+
         <RootStyle title="Create Appointment">
             <AuthLayout>
                 Already have an account? &nbsp;
@@ -381,55 +397,50 @@ const CreateAppointment = () => {
                                         <StepContent>
                                             <section>
                                                 <form className={classes.root} noValidate autoComplete="off">
-                                                    <TextField
-                                                        name='first_name'
-                                                        label='First Name'
-                                                        onChange={(evt) => setFirstName(evt.target.value)
-                                                        }
-                                                    />
-                                                    <TextField
-                                                        name='last_name'
-                                                        label='Last Name'
-                                                        onChange={(evt) => setLastName(evt.target.value)
-                                                        }
-                                                    />
-                                                    <TextField
-                                                        name='email'
-                                                        label='Email'
-                                                        error={!validEmail}
-                                                        helperText={
-                                                            validEmail ? null : "Enter a valid email address"
-                                                        }
-                                                        onChange={(evt) =>
-                                                            validateEmail(evt.target.value)
-                                                        }
-                                                    />
-                                                    <TextField
-                                                        name='phone'
-
-                                                        label='Phone'
-                                                        error={!validPhone}
-                                                        helperText={
-                                                            validPhone ? null : "Enter a valid phone number"
-                                                        }
-                                                        onChange={(evt) =>
-                                                            validatePhone(evt.target.value)
-                                                        }
-                                                    />
+                                                    <div>
+                                                        <TextField
+                                                            name='first_name'
+                                                            label='First Name'
+                                                            variant="standard"
+                                                            onChange={(evt) => setFirstName(evt.target.value)
+                                                            }
+                                                        />
+                                                        <TextField
+                                                            name='last_name'
+                                                            label='Last Name'
+                                                            variant="standard"
+                                                            onChange={(evt) => setLastName(evt.target.value)
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <br />
+                                                    <div>
+                                                        <TextField
+                                                            name='email'
+                                                            label='Email'
+                                                            variant="standard"
+                                                            error={!validEmail}
+                                                            helperText={
+                                                                validEmail ? null : "Enter a valid email address"
+                                                            }
+                                                            onChange={(evt) =>
+                                                                validateEmail(evt.target.value)
+                                                            }
+                                                        />
+                                                        <TextField
+                                                            name='phone'
+                                                            variant="standard"
+                                                            label='Phone'
+                                                            error={!validPhone}
+                                                            helperText={
+                                                                validPhone ? null : "Enter a valid phone number"
+                                                            }
+                                                            onChange={(evt) =>
+                                                                validatePhone(evt.target.value)
+                                                            }
+                                                        />
+                                                    </div>
                                                 </form>
-                                                <Button
-                                                    onClick={() => setConfirmationModalOpen(!confirmationModalOpen)
-                                                    }
-                                                    variant="outlined"
-                                                    disabled={!contactFormFilled || processed}
-                                                    style={{ marginTop: 20 }}
-                                                >
-                                                    {
-                                                        contactFormFilled
-                                                            ? "Schedule"
-                                                            : "Fill out your information to schedule"
-                                                    }
-                                                </Button>
                                             </section>
                                             {renderStepActions(2)}
                                         </StepContent>
@@ -466,6 +477,7 @@ const CreateAppointment = () => {
                                 {renderAppointmentConfirmation()}
                             </Dialog> */}
                             <SnackBar
+                                anchorOrigin={{ vertical, horizontal }}
                                 open={confirmationSnackbarOpen || isLoading}
                                 message={
                                     isLoading ? "Loading... " : confirmationSnackbarMessage || ""

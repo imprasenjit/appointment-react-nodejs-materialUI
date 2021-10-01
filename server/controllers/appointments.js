@@ -11,7 +11,7 @@ const appointmentController = {
       .populate("slots", "_id slot_time slot_date").exec((err, appointments) => res.json(appointments));
   },
   async getAvailableSlots(req, res) {
-    const slots = await Slot.find({ doctor: { $eq: req.body.doctor } })
+    const slots = await Slot.find({ doctor: { $eq: req.body.doctor } }).sort({ start_time: 1 })
       .exec();
     const searchDate = moment(req.body.appointmentDate).format('YYYY-MM-DD');
     const appointments = await Appointment.find({

@@ -5,6 +5,7 @@ import DashboardLayout from './layouts/dashboard';
 //
 import Login from './pages/Login';
 import Appointments from './pages/Appointments';
+import Calender from './pages/Calender';
 import Slots from './pages/Slots';
 import PatientAppointment from './pages/CreateAppointment';
 import ViewPatient from './pages/ViewPatient';
@@ -32,7 +33,9 @@ export default function Router() {
       path: '/dashboard',
       element: <DashboardLayout />,
       children: [
+        { path: '/', element: <Navigate to="/dashboard/appointments" replace /> },
         { path: 'appointments', element: <Appointments /> },
+        { path: 'calender', element: <Calender /> },
         { path: 'patients', element: <Patients /> },
         { path: 'viewPatient/:patientID', element: <ViewPatient /> },
         { path: 'patientdashboard/:patientID', element: <PatientDashboard /> },

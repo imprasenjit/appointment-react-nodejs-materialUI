@@ -202,7 +202,8 @@ export default function Appointments() {
                                         .map((row) => {
                                             const { _id, name, email, appointment_date, slot_time, status } = row;
                                             const isItemSelected = selected.indexOf(name) !== -1;
-
+                                            const time = slot_time.split('-');
+                                            console.log("time", time);
                                             return (
                                                 <TableRow
                                                     hover
@@ -228,7 +229,7 @@ export default function Appointments() {
                                                     </TableCell>
                                                     <TableCell align="left">{email}</TableCell>
                                                     <TableCell align="left">{moment(appointment_date).format("LL")}</TableCell>
-                                                    <TableCell align="left">{slot_time}</TableCell>
+                                                    <TableCell align="left">{moment(time[0], 'HHmm').format('HH:mm')} - {moment(time[1], 'HHmm').format('HH:mm')}</TableCell>
                                                     {/* <TableCell align="left">{isVerified ? 'Yes' : 'No'}</TableCell> */}
                                                     <TableCell align="left">
                                                         <Label

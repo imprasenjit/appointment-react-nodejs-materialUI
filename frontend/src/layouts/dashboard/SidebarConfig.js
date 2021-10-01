@@ -9,8 +9,13 @@ const getIcon = (name) => <Icon icon={name} width={22} height={22} />;
 
 const sidebarConfig = [
   {
-    title: 'Appointments',
+    title: 'Appointments (List View)',
     path: '/dashboard/appointments',
+    icon: getIcon(pieChart2Fill)
+  },
+  {
+    title: 'Appointments (Calender View)',
+    path: '/dashboard/calender',
     icon: getIcon(pieChart2Fill)
   },
   {

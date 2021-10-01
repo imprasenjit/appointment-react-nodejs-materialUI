@@ -9,16 +9,12 @@ import { httpCall, getClientCredientials } from "../../../middleware/axios-utils
 import { observationAPI } from "../../../config";
 // ----------------------------------------------------------------------
 import LinearProgress from "@material-ui/core/LinearProgress";
-const CHART_DATA = [
-  {
-    name: 'Blood Pressure',
-    data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30]
-  }
-];
+
 
 export default function ObservationChart({ patientId }) {
   const [observations, setObservations] = useState([])
   const [loader, setLoader] = useState();
+  // const [dataValue, setDataValue] = useState([])
   const searchObservations = async () => {
     setLoader(true);
     // const url = `${cernerAPI}/Observation?category=laboratory&patient=${patientId}`;
@@ -56,28 +52,27 @@ export default function ObservationChart({ patientId }) {
   // if (loader) {
   //   return (<div className={classes.div}><LinearProgress /></div>);
   // }
-
   const dataValue = observations.map((ob) => {
     return ob.resource.valueQuantity?.value;
   });
-  console.log(dataValue);
+  const CHART_DATA = [
+    {
+      name: 'Blood Pressure',
+      data: dataValue
+    }
+  ];
+
+  const labels = observations.map((ob) => {
+    return moment(ob.resource.issued).format("YYYY-M-D");
+  });
+  console.log("dataValue", dataValue);
+  console.log("CHART_DATA", CHART_DATA);
+  console.log("labels", labels);
   const chartOptions = merge({
     stroke: {
       curve: 'smooth',
     },
-    labels: [
-      '01/01/2003',
-      '02/01/2003',
-      '03/01/2003',
-      '04/01/2003',
-      '05/01/2003',
-      '06/01/2003',
-      '07/01/2003',
-      '08/01/2003',
-      '09/01/2003',
-      '10/01/2003',
-      '11/01/2003'
-    ],
+    labels: labels,
     xaxis: { type: 'datetime' },
     fill: {
       type: 'solid',
