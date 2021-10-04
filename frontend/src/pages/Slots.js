@@ -93,6 +93,7 @@ export default function Slots() {
     const [open, setOpen] = useState(false);
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
+    const [duration, setDuration] = useState(0);
     const [doctor, setDoctor] = useState();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -113,9 +114,26 @@ export default function Slots() {
         setOrderBy(property);
     };
     const generateSlots = () => {
-        console.log("startTime", startTime);
-        console.log("endTime", endTime);
-
+        if (startTime === '' || endTime === '' || duration === '') {
+            setError(true);
+            setErrorText("Please select start time and end time and duration.");
+            return false;
+        }
+        const slots = [];
+        let stime = moment(startTime).format('HH:mm');
+        const etime = moment(endTime).format('HHmm');
+        let gtime = 0;
+        let looptime = 0;
+        while (etime > looptime) {
+            console.log("stime", stime);
+            console.log("looptime", looptime);
+            looptime = moment(stime, "HH:mm").add(duration, 'minutes').format('HHmm');
+            gtime = moment(stime, "HHmm").add(duration, 'minutes').format('HH:mm');
+            slots.push({ "startTime": moment(stime, "HHmm").format("HH:mm"), "endTime": gtime });
+            stime = gtime;
+        }
+        console.log(slots);
+        setGeneratedSlots(slots);
     }
     const createSlot = async () => {
         setLoading(true);
@@ -264,10 +282,10 @@ export default function Slots() {
                                     renderInput={(params) => <TextField {...params} />}
                                 />
                             </LocalizationProvider>
-                            <TextField id="standard-basic" label="Enter Duration in minutes" variant="standard" helperText="E.g 120" />
+                            <TextField id="slot_duration" label="Enter SLot Duration in minutes" onChange={(e) => setDuration(e.target.value)} variant="standard" helperText="E.g 120" />
                             {generatedSlots.length > 0 &&
-                                generatedSlots.map((item) => (
-                                    <div>{item}</div>
+                                generatedSlots.map((item, key) => (
+                                    <div>{key + 1} . {item.startTime}-{item.endTime}</div>
                                 ))
                             }
                         </Stack>

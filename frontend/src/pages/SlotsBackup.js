@@ -113,9 +113,17 @@ export default function Slots() {
         setOrderBy(property);
     };
     const generateSlots = () => {
-        console.log("startTime", startTime);
+        console.log("startTimes", startTime);
         console.log("endTime", endTime);
+        if (startTime === '' || endTime === '') {
+            setError(true);
+            setErrorText("Please select start time and end time.");
+            return false;
+        }
+        const stime = moment(startTime).format('HHmm');
+        const etime = moment(endTime).format('HHmm');
 
+        while
     }
     const createSlot = async () => {
         setLoading(true);
