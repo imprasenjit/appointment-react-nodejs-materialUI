@@ -1,5 +1,8 @@
 const Slot = require('../models/slot');
 const mongoose = require('mongoose');
+const moment = require('moment');
+
+
 const Schema = mongoose.Schema,
   model = mongoose.model.bind(mongoose),
   { ObjectId } = mongoose.Schema;
@@ -11,36 +14,29 @@ const slotController = {
   },
   async create(req, res) {
     var requestBody = req.body;
-    console.log(req.body);
-    await Slot.find({
-      $and: [
-        { doctor: { $eq: requestBody.doctor } },
-        {
-          $or: [
-            { start_time: { $gte: (requestBody.startTime + 1), $lte: (requestBody.endTime + 1) } },
-            { end_time: { $gte: (requestBody.startTime + 1), $lte: (requestBody.endTime + 1) } }
-          ]
-        }
-      ]
-    }).exec((err, slots) => {
-      console.log("Test Slots", slots)
-      if (slots.length > 0) {
-        return res.status(400).json({
-          error: "Slot ALready available"
-        });
-      } else {
-        var newSlot = new Slot({
-          start_time: requestBody.startTime,
-          end_time: requestBody.endTime,
-          doctor: requestBody.doctor,
-          created_at: Date.now()
-        });
-        newSlot.save((err, saved) => {
-          Slot
-            .findOne({ _id: saved._id })
-            .exec((err, slot) => res.json(slot));
-        })
+    console.log(requestBody);
+    const slotsArray = [];
+    await Slot.deleteMany({ doctor: { $eq: requestBody.doctor } }).exec((err, slots) => {
+
+      let stime = moment(requestBody.startTime, "HHmm").format('HH:mm');
+      const etime = moment(requestBody.endTime, "HHmm").format('HHmm');
+      let gtime = 0;
+      let looptime = 0;
+      while (etime > looptime) {
+        // console.log("stime", stime);
+        // console.log("looptime", looptime);
+        looptime = moment(stime, "HH:mm").add(requestBody.duration, 'minutes').format('HHmm');
+        gtime = moment(stime, "HHmm").add(requestBody.duration, 'minutes').format('HH:mm');
+        slotsArray.push({ "doctor": requestBody.doctor, "created_at": Date.now(), "start_time": moment(stime, "HHmm").format("HHmm"), "end_time": looptime });
+        stime = gtime;
       }
+      // console.log("slotsArray", slotsArray);
+      Slot.insertMany(slotsArray).then(function () {
+        console.log("Data inserted");// Success
+        res.json({ success: true, slots: slotsArray });
+      }).catch(function (error) {
+        console.log(error)      // Failure
+      });
     });
 
   },

@@ -18,11 +18,7 @@ import StepContent from '@material-ui/core/StepContent';
 import axios from "axios";
 import { API } from '../config';
 import Page from '../components/Page';
-import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import { makeStyles } from '@material-ui/styles';
 import TextField from '@material-ui/core/TextField';
 import AuthLayout from '../layouts/AuthLayout';
@@ -30,14 +26,23 @@ import { Link, Container } from '@material-ui/core';
 import InputLabel from '@material-ui/core/InputLabel';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
-//import LocalizationProvider from '@mui/lab/LocalizationProvider';
-// import USERLIST from '../_mocks_/user';
+import Grid from '@mui/material/Grid';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import moment from "moment";
 import DatePicker from '@mui/lab/DatePicker';
 import frLocale from "date-fns/locale/fr";
 import Alert from '@mui/material/Alert';
-
 const useStyles = makeStyles((theme) => ({
+    toggle: {
+        width: 50,
+        '& .Mui-checked': {
+            color: '#109125',
+            transform: 'translateX(25px) !important'
+        },
+        '& .MuiSwitch-track': {
+            backgroundColor: '#008000e0'
+        }
+    },
     icon: {
         borderRadius: '50%',
         width: 16,
@@ -77,14 +82,6 @@ const RootStyle = styled(Page)(({ theme }) => ({
         display: 'flex'
     }
 }));
-const SectionStyle = styled(Card)(({ theme }) => ({
-    width: '100%',
-    maxWidth: 464,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    margin: theme.spacing(2, 0, 2, 2)
-}));
 const ContentStyle = styled('div')(({ theme }) => ({
     maxWidth: 780,
     margin: 'auto',
@@ -105,29 +102,31 @@ const CreateAppointment = () => {
     const [schedule, setSchedule] = useState([]);
     const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
     const [confirmationSnackbarOpen, setConfirmationSnackbarOpen] = useState(false);
-    const [appointmentDateSelected, setAppointmentDateSelected] = useState(false);
     const [appointmentMeridiem, setAppointmentMeridiem] = useState(0);
     const [validEmail, setValidEmail] = useState(true);
     const [validPhone, setValidPhone] = useState(true);
     const [finished, setFinished] = useState(false);
     const [stepIndex, setStepIndex] = useState(0);
     const [appointmentDate, setAppointmentDate] = useState(null);
-    const [showSlots, setShowSlots] = useState(false);
+    const [showSlots, setShowSlots] = useState();
     const [appointmentSlot, setAppointmentSlot] = useState(0);
-    const [contactFormFilled, setContactFormFilled] = useState(false);
     const [processed, setProcessed] = useState();
     const [isLoading, setIsLoading] = useState();
-    const [confirmationTextVisible, setConfirmationTextVisible] = useState(false);
     const [confirmationSnackbarMessage, setConfirmationSnackbarMessage] = useState();
-    const [doctor, setDoctor] = useState('');
+    const [doctor, setDoctor] = useState(0);
+    const [doctorName, setDoctorName] = useState('');
     const [doctors, setDoctors] = useState('');
     const [value, setValue] = useState(null);
-
     const [slots, setSlots] = useState();
-    const handleDoctorChange = (event) => {
+    const [buttonVariant, setButtonVariant] = useState('');
+    const handleDoctorChange = (event, value) => {
+        if (event.target.value !== 0) {
+            handleNext();
+        }
+
+        setDoctorName(value.props.name);
         setDoctor(event.target.value);
     };
-
     const fetchDoctors = () => {
         axios.get(API + `/doctors`).then((response) => {
             console.log("response via db: ", response.data);
@@ -155,9 +154,6 @@ const CreateAppointment = () => {
     const handleSetAppointmentSlot = (event) => {
         // console.log(event.target.value);
         setAppointmentSlot(event.target.value)
-    }
-    const handleSetAppointmentMeridiem = (meridiem) => {
-        setAppointmentMeridiem(meridiem);
     }
     const handleSubmit = () => {
         setConfirmationModalOpen(false);
@@ -188,7 +184,7 @@ const CreateAppointment = () => {
         setStepIndex(stepIndex + 1);
         setFinished(stepIndex >= 2);
         if (stepIndex === 1) {
-            setShowSlots(false);
+            // setShowSlots(false);
         }
     };
     const handlePrev = () => {
@@ -196,9 +192,8 @@ const CreateAppointment = () => {
             setStepIndex(stepIndex - 1);
         }
         if (stepIndex === 1) {
-            setShowSlots(false);
+            // setShowSlots(false);
         }
-
     };
     const validateEmail = (email) => {
         const regex = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
@@ -226,7 +221,6 @@ const CreateAppointment = () => {
             moment(day).startOf("day").diff(moment().startOf("day")) < 0
         );
     }
-
     const renderAppointmentConfirmation = () => {
         if (firstName !== "" && lastName != "" && validPhone && validEmail) {
             const spanStyle = { color: "#2d9df0" };
@@ -263,41 +257,72 @@ const CreateAppointment = () => {
                 <Alert severity="error">Please fill all the required informations.</Alert>
             )
         }
-
+    }
+    const handleSlotCLick = (value, slot) => {
+        // console.log(value);
+        setButtonVariant(value);
+        setAppointmentSlot(slot);
+        handleNext();
     }
     const renderAppointmentTimes = () => {
         console.log("Slots", slots);
         if (!isLoading) {
-            return slots.map((slot) => {
-                return (
-                    // <FormControlLabel value={slot.toString()} control={<Radio />} label={time1.format("h:mm a") + " - " + time2.format("h:mm a")} />
-                    <FormControlLabel
-                        key={slot._id}
-                        value={`${slot.start_time}-${slot.end_time}`}
-                        disabled={slot.status === 'available' ? false : true}
-                        control={<Radio />}
-                        label={moment(slot.start_time, "hh").format("LT") + " - " + moment(slot.end_time, "hh").format("LT")}
-                    />
-                );
-            });
+            return <Grid container mt={2} spacing={1}>
+                {slots.map((slot, key) => {
+                    return (
+                        // <FormControlLabel value={slot.toString()} control={<Radio />} label={time1.format("h:mm a") + " - " + time2.format("h:mm a")} />
+                        // <FormControlLabel
+                        //     key={slot._id}
+                        //     value={`${slot.start_time}-${slot.end_time}`}
+                        //     disabled={slot.status === 'available' ? false : true}
+                        //     control={<Radio />}
+                        //     label={moment(slot.start_time, "hh").format("LT") + " - " + moment(slot.end_time, "hh").format("LT")}
+                        // />
+                        <Grid item xs={3}> <Button variant={buttonVariant === `button-${key}` ? "contained" : "outlined"} onClick={(e) => handleSlotCLick(`button-${key}`, e.target.value)} value={`${slot.start_time}-${slot.end_time}`} disabled={slot.status === 'available' ? false : true}>
+                            {moment(slot.start_time, "HHmm").format("HH:mm") + " - " + moment(slot.end_time, "HHmm").format("HH:mm")}
+                        </Button>
+                        </Grid>
+                    );
+                })
+                }
+            </Grid >
         } else {
             return null;
         }
     }
+    const handleDateButtonClick = (date) => {
+        setAppointmentDate(date);
+        setValue(date);
+        const data = {
+            appointmentDate: date,
+            doctor: doctor
+        };
+        axios.post(API + `/getAvailableSlots`, data).then((response) => {
+            console.log("response via db: ", response.data);
+            setSlots(response.data);
+            setShowSlots(true);
+            // handleDoctorsReponse(response.data);
+        });
+    }
     const DatePickerExampleSimple = () => (
-        <LocalizationProvider dateAdapter={AdapterDateFns} locale={frLocale}>
-            <DatePicker
-                label="Select Date"
-                mask="__/__/____"
-                value={appointmentDate}
-                onChange={(newValue) => {
-                    handleDateChange(newValue);
-                }}
-                renderInput={(params) => <TextField {...params} />}
-            />
-        </LocalizationProvider>
+        <Grid container spacing={1}>
+            <Grid item xs={3}><Button variant="outlined" color="secondary" onClick={() => handleDateButtonClick(moment(new Date()))}> {moment(new Date()).format("DD-MM-YYYY")} </Button></Grid>
+            <Grid item xs={3}><Button variant="outlined" color="secondary" onClick={() => handleDateButtonClick(moment(new Date()).add(1, "days"))}> {moment(new Date()).add(1, "days").format("DD-MM-YYYY")} </Button></Grid>
+            <Grid item xs={3}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={frLocale}>
+                    <DatePicker
+                        label=""
+                        mask="__-__-____"
+                        value={appointmentDate}
+                        onChange={(newValue) => {
+                            handleDateChange(newValue);
+                        }}
+                        renderInput={(params) => <TextField size="small" style={{ width: "120px", marginTop: "0px" }} variant="standard" {...params} />}
+                    />
+                </LocalizationProvider>
+            </Grid>
+        </Grid >
     );
-
     const renderStepActions = (step) => {
         return (
             <div style={{ margin: "12px 0" }}>
@@ -323,8 +348,14 @@ const CreateAppointment = () => {
     }
     const vertical = 'top';
     const horizontal = 'center';
+    const showSlotsFormat = (slots) => {
+        if (isNaN(slots)) {
+            const arr = slots.split('-');
+            return moment(arr[0], "HHmm").format("HH:mm") + '-' + moment(arr[1], "HHmm").format("HH:mm")
+        }
+        else return ''
+    }
     return (
-
         <RootStyle title="Create Appointment">
             <AuthLayout>
                 Already have an account? &nbsp;
@@ -351,48 +382,39 @@ const CreateAppointment = () => {
                                     orientation='vertical'
                                     linear={false}>
                                     <Step>
-                                        <StepLabel>Choose Doctor</StepLabel>
+                                        <StepLabel style={{ cursor: "pointer" }} onClick={() => setStepIndex(0)}>
+                                            {doctorName ? "Selected" : "Choose"} Doctor
+                                            {doctorName && '( ' + doctorName + ' )'}
+                                        </StepLabel>
                                         <StepContent>
-                                            <InputLabel id="demo-simple-select-label">Select Doctor</InputLabel>
                                             <Select
                                                 className={classes.formControl}
-                                                labelId="demo-simple-select-label"
-                                                id="demo-simple-select"
                                                 value={doctor}
                                                 onChange={handleDoctorChange}
                                             >
+                                                <MenuItem name={false} value={0}>Select Doctor</MenuItem>
                                                 {doctors && doctors.map((item) =>
-                                                    <MenuItem value={item._id}>{item.name}</MenuItem>
+                                                    <MenuItem name={item.name} value={item._id}>{item.name}</MenuItem>
                                                 )
                                                 }
-
-                                            </Select>{renderStepActions(0)}</StepContent>
+                                            </Select></StepContent>
                                     </Step>
-                                    <Step disabled={!appointmentDate}>
-                                        <StepLabel>
-                                            Choose an available Date and time time for your appointment
+                                    <Step disabled={!doctor}>
+                                        <StepLabel style={{ cursor: "pointer" }} onClick={() => setStepIndex(1)}>
+                                            {appointmentDate ? "Selected" : "Choose"} Slot  {appointmentDate && '( ' + moment(appointmentDate).format("DD-MM-YYYY") + ' ' + showSlotsFormat(appointmentSlot) + ' ) '}
                                         </StepLabel>
                                         <StepContent>
                                             {DatePickerExampleSimple()}
                                             {
                                                 showSlots &&
-                                                <RadioGroup
-                                                    style={{
-                                                        marginTop: 15,
-                                                        marginLeft: 15,
-                                                    }}
-                                                    value={appointmentSlot.toString()}
-                                                    onChange={handleSetAppointmentSlot}>
-                                                    {renderAppointmentTimes()}
-                                                </RadioGroup>
+                                                renderAppointmentTimes()
                                             }
-                                            {renderStepActions(1)}
+
                                         </StepContent>
                                     </Step>
                                     <Step>
-                                        <StepLabel>
-                                            Share your contact information with us and we'll send you a
-                                            reminder
+                                        <StepLabel style={{ cursor: "pointer" }} onClick={() => setStepIndex(2)}>
+                                            contact information (Reminder)
                                         </StepLabel>
                                         <StepContent>
                                             <section>
@@ -483,7 +505,6 @@ const CreateAppointment = () => {
                                     isLoading ? "Loading... " : confirmationSnackbarMessage || ""
                                 }
                                 autoHideDuration={10000}
-
                             />
                         </section>
                     </div>

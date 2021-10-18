@@ -20,7 +20,6 @@ import {
     Stack,
     Avatar,
     Button,
-    Checkbox,
     TableRow,
     TableBody,
     TableCell,
@@ -43,7 +42,9 @@ import moment from "moment";
 import TimePicker from '@mui/lab/TimePicker';
 
 // ----------------------------------------------------------------------
-
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 const TABLE_HEAD = [
     { id: 'sl_no', label: '(#)', alignRight: false },
     { id: 'start_time', label: 'Start Time', alignRight: false },
@@ -125,14 +126,14 @@ export default function Slots() {
         let gtime = 0;
         let looptime = 0;
         while (etime > looptime) {
-            console.log("stime", stime);
-            console.log("looptime", looptime);
+            // console.log("stime", stime);
+            // console.log("looptime", looptime);
             looptime = moment(stime, "HH:mm").add(duration, 'minutes').format('HHmm');
             gtime = moment(stime, "HHmm").add(duration, 'minutes').format('HH:mm');
             slots.push({ "startTime": moment(stime, "HHmm").format("HH:mm"), "endTime": gtime });
             stime = gtime;
         }
-        console.log(slots);
+        // console.log(slots);
         setGeneratedSlots(slots);
     }
     const createSlot = async () => {
@@ -143,6 +144,7 @@ export default function Slots() {
             data: {
                 startTime: moment(startTime).format('HHmm'),
                 endTime: moment(endTime).format('HHmm'),
+                duration: duration,
                 doctor: doctor
             }
         };
@@ -170,7 +172,7 @@ export default function Slots() {
         };
         await httpCall(reqConfig)
             .then((res) => {
-                console.log("resData", res.data);
+                // console.log("resData", res.data);
                 setSlotList(res.data);
                 // setLoader(false);
             })
@@ -201,7 +203,7 @@ export default function Slots() {
                 .add(slot + 1, "hours");
             return time1.format("h:mm a") + " - " + time2.format("h:mm a");
         });
-        console.log(times);
+        // console.log(times);
         return times[item];
     }
     const handleClick = (event, name) => {
@@ -285,7 +287,10 @@ export default function Slots() {
                             <TextField id="slot_duration" label="Enter SLot Duration in minutes" onChange={(e) => setDuration(e.target.value)} variant="standard" helperText="E.g 120" />
                             {generatedSlots.length > 0 &&
                                 generatedSlots.map((item, key) => (
-                                    <div>{key + 1} . {item.startTime}-{item.endTime}</div>
+                                    <FormGroup>
+                                        <FormControlLabel control={<Checkbox defaultChecked />} label={key + 1 + '. ' + item.startTime + '-' + item.endTime} />
+                                    </FormGroup>
+
                                 ))
                             }
                         </Stack>
@@ -342,7 +347,7 @@ export default function Slots() {
                                         .map((row, key) => {
                                             const { _id, start_time, end_time } = row;
                                             const isItemSelected = selected.indexOf(_id) !== -1;
-
+                                            let slno = page * rowsPerPage + key + 1;
                                             return (
                                                 <TableRow
                                                     hover
@@ -359,7 +364,7 @@ export default function Slots() {
                                                         />
                                                     </TableCell>
                                                     <TableCell component="th" scope="row" padding="none">
-                                                        {key + 1}
+                                                        {slno}
                                                     </TableCell>
                                                     <TableCell align="left">{moment(start_time, "hhmm").format("LT")}</TableCell>
                                                     <TableCell align="left">{moment(end_time, "hhmm").format("LT")}</TableCell>
